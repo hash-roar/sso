@@ -3,8 +3,25 @@ use sqlx::{postgres::PgPoolOptions, PgPool};
 
 mod model;
 
-pub use  model::User;
+pub use model::User;
+use tracing::warn;
 
+pub enum DbError {
+    NotFound,
+    InterError,
+}
+
+impl From<sqlx::Error> for DbError {
+    fn from(e: sqlx::Error) -> Self {
+        match e {
+            sqlx::Error::RowNotFound => DbError::NotFound,
+            _ => {
+                warn!("error happen at database:{}", e);
+                DbError::InterError
+            }
+        }
+    }
+}
 
 pub async fn get_pgpool(dsn: &str) -> Result<PgPool> {
     let pool = PgPoolOptions::new()

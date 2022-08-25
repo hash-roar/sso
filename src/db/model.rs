@@ -1,4 +1,4 @@
-use color_eyre::Result;
+use super::DbError;
 use serde::{Deserialize, Serialize};
 use sqlx::PgPool;
 use tracing::{debug, instrument, warn};
@@ -15,7 +15,7 @@ pub struct User {
 
 impl User {
     #[instrument(skip(pool))]
-    pub async fn add(&self, pool: &PgPool) -> Result<()> {
+    pub async fn add(&self, pool: &PgPool) -> Result<(), DbError> {
         debug!("insert {:?}", self);
         let result = sqlx::query(
             "INSERT INTO users(nick_name,student_id,email,contact,passwd) VALUES($1,$2,$3,$4,$5)",
@@ -32,19 +32,19 @@ impl User {
         }
         Ok(())
     }
-    #[instrument]
-    pub async fn get_by_id(uid: i32, pool: &PgPool) -> Result<Option<User>> {
-        let mut user = sqlx::query_as::<_, User>("SELECT * FROM users WHERE uid=?")
-            .bind(uid)
-            .fetch_all(pool)
-            .await?;
+    // #[instrument]
+    // pub async fn get_by_id(uid: i32, pool: &PgPool) -> Result<Option<User>> {
+    //     let mut user = sqlx::query_as::<_, User>("SELECT * FROM users WHERE uid=?")
+    //         .bind(uid)
+    //         .fetch_all(pool)
+    //         .await?;
 
-        debug!("get user:{:?}", user.first());
-        Ok(user.pop())
-    }
+    //     debug!("get user:{:?}", user.first());
+    //     Ok(user.pop())
+    // }
 
     #[instrument(skip(pool))]
-    pub async fn get_by_name(name: String, pool: &PgPool) -> Result<User> {
+    pub async fn get_by_name(name: String, pool: &PgPool) -> Result<User, DbError> {
         let user = sqlx::query_as::<_, User>("SELECT * FROM users WHERE nick_name = $1")
             .bind(name)
             .fetch_one(pool)

@@ -1,13 +1,18 @@
+
 use actix_web::{
     http::{header::ContentType, StatusCode},
     HttpResponse, ResponseError,
 };
 use derive_more::{Display, Error};
 
+use crate::db::DbError;
+
 #[derive(Debug, Display, Error)]
 pub enum SError {
     #[display(fmt = "An internal error occurred. Please try again later.")]
     ServerError,
+    #[display(fmt = "what you need is not found")]
+    NotFound,
 }
 
 impl ResponseError for SError {
@@ -19,6 +24,17 @@ impl ResponseError for SError {
     fn status_code(&self) -> actix_web::http::StatusCode {
         match *self {
             Self::ServerError => StatusCode::INTERNAL_SERVER_ERROR,
+            Self::NotFound => StatusCode::NOT_FOUND,
         }
     }
 }
+
+impl From<DbError> for SError {
+    fn from(e: DbError) -> Self {
+        match e {
+            DbError::NotFound => Self::NotFound,
+            DbError::InterError => Self::ServerError,
+        }
+    }
+}
+
