@@ -34,6 +34,7 @@ async fn main() -> Result<()> {
             .wrap(Logger::default())
             .service(hello)
             .route("/user", web::post().to(add_user))
+            .route("/user/{id}", web::get().to(get_user_by_name))
     })
     .bind(&config.listen)?
     .run()

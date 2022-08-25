@@ -5,7 +5,7 @@ use tracing::{debug, instrument, warn};
 
 #[derive(Debug, Serialize, Deserialize, sqlx::FromRow, Clone)]
 pub struct User {
-    pub uid: Option<i64>,
+    pub uid: Option<i32>,
     pub nick_name: String,
     pub student_id: String,
     pub email: String,
@@ -41,5 +41,16 @@ impl User {
 
         debug!("get user:{:?}", user.first());
         Ok(user.pop())
+    }
+
+    #[instrument(skip(pool))]
+    pub async fn get_by_name(name: String, pool: &PgPool) -> Result<User> {
+        let user = sqlx::query_as::<_, User>("SELECT * FROM users WHERE nick_name = $1")
+            .bind(name)
+            .fetch_one(pool)
+            .await?;
+
+        debug!("get user:{:?}", user);
+        Ok(user)
     }
 }

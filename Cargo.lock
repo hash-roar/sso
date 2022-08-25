@@ -1728,6 +1728,7 @@ dependencies = [
  "actix-web",
  "color-eyre",
  "config",
+ "derive_more",
  "dotenv",
  "serde",
  "sqlx",
