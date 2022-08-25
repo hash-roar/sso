@@ -1,3 +1,4 @@
+extern crate crypto;
 use crate::config::ServerConfig;
 use actix_web::{
     get,
@@ -14,6 +15,7 @@ mod config;
 mod db;
 mod error;
 mod handlers;
+mod utils;
 
 #[get("/")]
 async fn hello() -> impl Responder {

@@ -3,7 +3,7 @@ DROP TABLE users;
 CREATE TABLE users(
     uid  serial PRIMARY KEY ,
     email varchar(128),
-    nick_name varchar(16),
+    nick_name varchar(16) UNIQUE not null,
     student_id varchar(16),
     contact varchar(64),
     passwd varchar(128)

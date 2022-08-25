@@ -14,11 +14,11 @@ pub struct User {
 }
 
 impl User {
-    #[instrument]
+    #[instrument(skip(pool))]
     pub async fn add(&self, pool: &PgPool) -> Result<()> {
         debug!("insert {:?}", self);
         let result = sqlx::query(
-            "INSERT INTO users(nick_name,student_id,email,contact,passwd) VALUES(?,?,?,?)",
+            "INSERT INTO users(nick_name,student_id,email,contact,passwd) VALUES($1,$2,$3,$4,$5)",
         )
         .bind(&self.nick_name)
         .bind(&self.student_id)
@@ -33,7 +33,7 @@ impl User {
         Ok(())
     }
     #[instrument]
-    pub async fn get_by_id(uid: i64, pool: &PgPool) -> Result<Option<User>> {
+    pub async fn get_by_id(uid: i32, pool: &PgPool) -> Result<Option<User>> {
         let mut user = sqlx::query_as::<_, User>("SELECT * FROM users WHERE uid=?")
             .bind(uid)
             .fetch_all(pool)
