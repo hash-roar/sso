@@ -4,7 +4,7 @@ use crate::{db::User, error::SError};
 use actix_web::{web, Responder, Result};
 use crypto::{digest::Digest, sha2::Sha256};
 use sqlx::PgPool;
-use tracing::{error, instrument};
+use tracing::instrument;
 
 use super::SResult;
 
@@ -17,7 +17,7 @@ pub async fn add_user(
     user.passwd = get_digest(&user.passwd);
     user.add(db_pool.borrow())
         .await
-        .map_err(|e| SError::ServerError)?;
+        .map_err(|_| SError::ServerError)?;
     // Ok(SResult::new(0, "", user).into())
     let result: String = SResult::new(0, "", user).into();
     Ok(result)
@@ -31,7 +31,7 @@ pub async fn get_user_by_name(
     let pool = db_pool.into_inner();
     let user = User::get_by_name(name.to_string(), pool.as_ref())
         .await
-        .map_err(|e| SError::ServerError)?;
+        .map_err(|_| SError::ServerError)?;
     Ok(web::Json(user))
 }
 

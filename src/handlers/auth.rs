@@ -6,14 +6,13 @@ use sqlx::PgPool;
 use tracing::{debug, instrument};
 
 use crate::db::{self};
+use crate::error::SError;
 use crate::handlers::SResult;
 
-
-
 #[derive(Debug, Deserialize)]
-struct LoginData {
-    name: String,
-    password: String,
+pub struct LoginData {
+    pub name: String,
+    pub password: String,
 }
 
 #[instrument(skip(db_pool))]
@@ -23,11 +22,14 @@ pub async fn login(
 ) -> Result<impl Responder> {
     debug!("login data:{:?}", info);
 
-    let user = db::User::get_by_name(info.name, db_pool.borrow())
+    let user = db::User::get_by_name(info.name.to_owned(), db_pool.borrow())
         .await
-        .map_err(|e| e.into())?;
-    if user.passwd != info.password {}{
-        SResult::new
+        .map_err(|e| {
+            let error: SError = e.into();
+            error
+        })?;
+    if user.passwd != info.password {
+        return Ok(SResult::new(1, "wrong passwd", "").to_string());
     }
-    Ok(())
+    Ok(SResult::default().to_string())
 }

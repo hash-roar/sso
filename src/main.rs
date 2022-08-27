@@ -37,6 +37,7 @@ async fn main() -> Result<()> {
             .service(hello)
             .route("/user", web::post().to(add_user))
             .route("/user/{id}", web::get().to(get_user_by_name))
+            .route("/login", web::post().to(login))
     })
     .bind(&config.listen)?
     .run()

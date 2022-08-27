@@ -4,6 +4,7 @@ mod user;
 use serde::{Deserialize, Serialize};
 use serde_json::to_string;
 pub use user::*;
+pub use auth::*;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct SResult {
@@ -22,6 +23,10 @@ impl SResult {
             error_msg: err_msg.to_string(),
             data: to_string(&data).ok().unwrap_or_default(),
         }
+    }
+
+    pub fn to_string(&self) -> String {
+        to_string(&self).map_or("serde error".to_string(), |v| v)
     }
 }
 
