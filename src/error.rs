@@ -1,4 +1,3 @@
-
 use actix_web::{
     http::{header::ContentType, StatusCode},
     HttpResponse, ResponseError,
@@ -33,8 +32,7 @@ impl From<DbError> for SError {
     fn from(e: DbError) -> Self {
         match e {
             DbError::NotFound => Self::NotFound,
-            DbError::InterError => Self::ServerError,
+            _ => Self::ServerError,
         }
     }
 }
-

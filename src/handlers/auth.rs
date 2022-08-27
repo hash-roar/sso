@@ -8,6 +8,7 @@ use tracing::{debug, instrument};
 use crate::db::{self};
 use crate::error::SError;
 use crate::handlers::SResult;
+use crate::utils::get_digest;
 
 #[derive(Debug, Deserialize)]
 pub struct LoginData {
@@ -22,14 +23,17 @@ pub async fn login(
 ) -> Result<impl Responder> {
     debug!("login data:{:?}", info);
 
-    let user = db::User::get_by_name(info.name.to_owned(), db_pool.borrow())
-        .await
-        .map_err(|e| {
-            let error: SError = e.into();
-            error
-        })?;
-    if user.passwd != info.password {
-        return Ok(SResult::new(1, "wrong passwd", "").to_string());
+    let result = db::User::get_by_name(info.name.to_owned(), db_pool.borrow()).await;
+    if let Err(e) = result {
+        match e {
+            db::DbError::NotFound => return Ok(SResult::new(1, "user not found", "").to_string()),
+            _ => return Err(SError::ServerError.into()),
+        }
+    }
+    let user = result.unwrap();
+    let pass = get_digest(&info.password);
+    if user.passwd != pass {
+        return Ok(SResult::new(1, "wrong password", "").to_string());
     }
     Ok(SResult::default().to_string())
 }

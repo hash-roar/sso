@@ -6,8 +6,11 @@ mod model;
 pub use model::User;
 use tracing::warn;
 
+#[derive(Debug)]
 pub enum DbError {
     NotFound,
+    #[allow(dead_code)]
+    DuplicateKey,
     InterError,
 }
 

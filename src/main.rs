@@ -38,6 +38,7 @@ async fn main() -> Result<()> {
             .route("/user", web::post().to(add_user))
             .route("/user/{id}", web::get().to(get_user_by_name))
             .route("/login", web::post().to(login))
+            .service(web::scope("/u").service(add_url))
     })
     .bind(&config.listen)?
     .run()

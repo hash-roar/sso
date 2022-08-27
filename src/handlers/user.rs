@@ -1,8 +1,7 @@
 use std::borrow::Borrow;
 
-use crate::{db::User, error::SError};
+use crate::{db::User, error::SError, utils::get_digest};
 use actix_web::{web, Responder, Result};
-use crypto::{digest::Digest, sha2::Sha256};
 use sqlx::PgPool;
 use tracing::instrument;
 
@@ -15,12 +14,10 @@ pub async fn add_user(
 ) -> Result<impl Responder> {
     let mut user = user_info.into_inner();
     user.passwd = get_digest(&user.passwd);
-    user.add(db_pool.borrow())
-        .await
-        .map_err(|_| SError::ServerError)?;
-    // Ok(SResult::new(0, "", user).into())
-    let result: String = SResult::new(0, "", user).into();
-    Ok(result)
+    if let Err(_) = user.add(db_pool.borrow()).await {
+        return Ok(SResult::new(1, "add user failed", "").to_string());
+    }
+    Ok(SResult::default().to_string())
 }
 
 #[instrument(skip(db_pool))]
@@ -33,23 +30,4 @@ pub async fn get_user_by_name(
         .await
         .map_err(|_| SError::ServerError)?;
     Ok(web::Json(user))
-}
-
-fn get_digest(data: &str) -> String {
-    let mut sha = Sha256::new();
-    sha.input_str(data);
-    sha.result_str()
-}
-
-#[cfg(test)]
-mod tests {
-    use crypto::{digest::Digest, sha2::Sha256};
-
-    #[test]
-    fn test_sha256() {
-        let str = "this is str";
-        let mut sha = Sha256::new();
-        sha.input_str(str);
-        println!("{}", sha.result_str());
-    }
 }

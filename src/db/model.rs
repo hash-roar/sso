@@ -1,6 +1,9 @@
 use super::DbError;
 use serde::{Deserialize, Serialize};
-use sqlx::PgPool;
+use sqlx::{
+    types::chrono::{self, TimeZone, Utc},
+    PgPool,
+};
 use tracing::{debug, instrument, warn};
 
 #[derive(Debug, Serialize, Deserialize, sqlx::FromRow, Clone)]
@@ -11,6 +14,14 @@ pub struct User {
     pub email: String,
     pub contact: String,
     pub passwd: String,
+}
+
+#[derive(Debug, Serialize, Deserialize, sqlx::FromRow, Clone)]
+pub struct Url {
+    pub id: Option<i32>,
+    pub short_url: String,
+    pub dest_url: String,
+    // pub time: chrono::NaiveDate,
 }
 
 impl User {
@@ -52,5 +63,19 @@ impl User {
 
         debug!("get user:{:?}", user);
         Ok(user)
+    }
+}
+
+impl Url {
+    #[instrument(skip(pool))]
+    pub async fn add(&self, pool: &PgPool) -> Result<(), DbError> {
+        debug!("insert {:?}", self);
+        // let result =
+        sqlx::query("INSERT INTO uers values ($1,$2)")
+            .bind(&self.short_url)
+            .bind(&self.dest_url)
+            .execute(pool)
+            .await?;
+        Ok(())
     }
 }

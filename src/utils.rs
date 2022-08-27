@@ -2,6 +2,7 @@
 use crypto::buffer::{BufferResult, ReadBuffer, WriteBuffer};
 use crypto::symmetriccipher::SymmetricCipherError;
 use crypto::{aes, blockmodes, buffer};
+use crypto::{digest::Digest, sha2::Sha256};
 
 pub fn encrypt(data: &[u8], key: &[u8], iv: &[u8]) -> Result<Vec<u8>, SymmetricCipherError> {
     let mut encryptor =
@@ -31,7 +32,6 @@ pub fn encrypt(data: &[u8], key: &[u8], iv: &[u8]) -> Result<Vec<u8>, SymmetricC
     Ok(final_result)
 }
 
-
 fn decrypt(encrypted_data: &[u8], key: &[u8], iv: &[u8]) -> Result<Vec<u8>, SymmetricCipherError> {
     let mut decryptor =
         aes::cbc_decryptor(aes::KeySize::KeySize256, key, iv, blockmodes::PkcsPadding);
@@ -59,6 +59,12 @@ fn decrypt(encrypted_data: &[u8], key: &[u8], iv: &[u8]) -> Result<Vec<u8>, Symm
     Ok(final_result)
 }
 
+pub fn get_digest(data: &str) -> String {
+    let mut sha = Sha256::new();
+    sha.input_str(data);
+    sha.result_str()
+}
+
 #[cfg(test)]
 mod tests {
     use super::encrypt;
@@ -71,11 +77,8 @@ mod tests {
 
         let encrypt_data = encrypt(message.as_bytes(), key.as_bytes(), iv.as_bytes()).unwrap();
 
-
-
-        println!("{:?}",encrypt_data);
-        let str= String::from_utf8_lossy(&encrypt_data);
-        println!("{:?}",str);
-
+        println!("{:?}", encrypt_data);
+        let str = String::from_utf8_lossy(&encrypt_data);
+        println!("{:?}", str);
     }
 }

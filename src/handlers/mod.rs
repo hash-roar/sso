@@ -1,10 +1,11 @@
 mod auth;
+mod shorturls;
 mod user;
-
+pub use auth::*;
 use serde::{Deserialize, Serialize};
 use serde_json::to_string;
+pub use shorturls::*;
 pub use user::*;
-pub use auth::*;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct SResult {
@@ -14,12 +15,12 @@ pub struct SResult {
 }
 
 impl SResult {
-    pub fn new<T>(status: i32, err_msg: &str, data: T) -> Self
+    pub fn new<T>(error: i32, err_msg: &str, data: T) -> Self
     where
         T: Serialize,
     {
         SResult {
-            error: status,
+            error,
             error_msg: err_msg.to_string(),
             data: to_string(&data).ok().unwrap_or_default(),
         }
