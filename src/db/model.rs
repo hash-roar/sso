@@ -1,4 +1,5 @@
 use super::DbError;
+use ::chrono::{DateTime, Local};
 use serde::{Deserialize, Serialize};
 use sqlx::{
     types::chrono::{self, TimeZone, Utc},
@@ -21,7 +22,7 @@ pub struct Url {
     pub id: Option<i32>,
     pub short_url: String,
     pub dest_url: String,
-    // pub time: chrono::NaiveDate,
+    pub time: DateTime<Local>,
 }
 
 impl User {
@@ -67,13 +68,22 @@ impl User {
 }
 
 impl Url {
+    pub fn new(short: String, dest: String) -> Self {
+        Url {
+            id: None,
+            short_url: short,
+            dest_url: dest,
+            time: Local::now(),
+        }
+    }
     #[instrument(skip(pool))]
     pub async fn add(&self, pool: &PgPool) -> Result<(), DbError> {
         debug!("insert {:?}", self);
         // let result =
-        sqlx::query("INSERT INTO uers values ($1,$2)")
+        sqlx::query("INSERT INTO urls(short_url,dest_url,time) values ($1,$2,$3)")
             .bind(&self.short_url)
             .bind(&self.dest_url)
+            .bind(&self.time)
             .execute(pool)
             .await?;
         Ok(())

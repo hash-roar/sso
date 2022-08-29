@@ -381,8 +381,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "bfd4d1b31faaa3a89d7934dbded3111da0d2ef28e3ebccdb4f0179f5929d1ef1"
 dependencies = [
  "iana-time-zone",
+ "js-sys",
  "num-integer",
  "num-traits",
+ "serde",
+ "time 0.1.44",
+ "wasm-bindgen",
  "winapi",
 ]
 
@@ -1849,6 +1853,7 @@ name = "sso"
 version = "0.1.0"
 dependencies = [
  "actix-web",
+ "chrono",
  "color-eyre",
  "config",
  "derive_more",

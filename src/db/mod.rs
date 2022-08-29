@@ -3,7 +3,7 @@ use sqlx::{postgres::PgPoolOptions, PgPool};
 
 mod model;
 
-pub use model::User;
+pub use model::*;
 use tracing::warn;
 
 #[derive(Debug)]
